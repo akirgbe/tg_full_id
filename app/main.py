@@ -11,7 +11,7 @@ from aiogram.types import BotCommand, BotCommandScopeDefault
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from app.bot.handlers import start, help, id, get_shared, any_message, database_command
-from app.bot.middlewares.wihite_list import WhitelistMiddleware
+from app.bot.middlewares.white_list import WhitelistMiddleware
 from app.config import settings
 from db import db
 
