@@ -62,7 +62,6 @@ async def main():
     print("=" * 50)
     print(f"🤖 BOT_TOKEN: {'*' * 10 + settings.BOT_TOKEN[-5:]}")
     print(f"⭐ SUPER_ADMIN_ID: {settings.SUPER_ADMIN_ID}")
-    print(f"👥 ADMIN_IDS: {settings.ADMIN_IDS if settings.ADMIN_IDS else '[]'}")
 
     all_users = db.get_all_users()
     print(f"📋 Пользователей в белом списке: {len(all_users)}")
@@ -78,7 +77,11 @@ async def main():
 
     # Удаляем старый вебхук
     await bot.delete_webhook(drop_pending_updates=True)
-    await dp.start_polling(bot)
+
+    try:
+        await dp.start_polling(bot)
+    finally:
+        await bot.session.close()
 
 
 if __name__ == '__main__':

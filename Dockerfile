@@ -1,10 +1,12 @@
-FROM python
+FROM python:3.9-slim
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
-COPY requirements.txt ./
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Копируем ВСЕ файлы включая папку app
 COPY . .
 
-CMD ["/bin/bash", "-c", "python aiogram_run.py"]
+# Правильная команда запуска - указываем полный путь
+CMD ["python", "app/main.py"]
