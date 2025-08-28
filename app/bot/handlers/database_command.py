@@ -20,8 +20,10 @@ async def add_user(message: types.Message):
 
     if db.add_user(user_id):
         await message.answer(f"✅ Пользователь {user_id} добавлен в whitelist")
+        return None
     else:
         await message.answer(f"⚠️ Пользователь {user_id} уже в whitelist")
+        return None
 
 
 @router.message(Command('remove'))
@@ -42,8 +44,10 @@ async def remove_user(message: types.Message):
 
     if db.remove_user(user_id):
         await message.answer(f"🗑 Пользователь {user_id} удалён")
+        return None
     else:
         await message.answer(f"⚠️ Пользователь {user_id} не найден")
+        return None
 
 
 @router.message(Command("list"))

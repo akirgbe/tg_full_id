@@ -1,5 +1,6 @@
 import os
 
+from loguru import logger
 from sqlalchemy import create_engine, Column, Integer, String, BigInteger
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
@@ -19,29 +20,24 @@ class WhitelistUser(Base):
 
 class Database:
     def __init__(self, db_name='whitelist.db'):
-        # ✅ ФИКС: Абсолютный путь к базе в папке data/
+        # Абсолютный путь к базе в папке data/
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         db_path = os.path.join(base_dir, 'data', db_name)
-
-        # ✅ Создаем папку data если ее нет
         os.makedirs(os.path.dirname(db_path), exist_ok=True)
-
         self.db_path = db_path
         self.engine = create_engine(f'sqlite:///{self.db_path}', echo=False)
         Base.metadata.create_all(self.engine)
         Session = sessionmaker(bind=self.engine)
         self.session = Session()
-        print(f"✅ База данных подключена: {self.db_path}")
+        logger.info(f"База данных подключена: {self.db_path}")
 
     def add_user(self, user_id, username=None, first_name=None, last_name=None):
         """Добавить пользователя в белый список"""
         try:
-            # Проверяем, нет ли уже пользователя
             existing_user = self.session.query(WhitelistUser).filter_by(user_id=user_id).first()
             if existing_user:
-                print(f"⚠️ Пользователь {user_id} уже существует")
+                logger.warning(f"Пользователь {user_id} уже существует")
                 return False
-
             user = WhitelistUser(
                 user_id=user_id,
                 username=username,
@@ -50,23 +46,28 @@ class Database:
             )
             self.session.add(user)
             self.session.commit()
-            print(f"✅ Добавлен пользователь: {user_id}")
+            logger.info(f"Добавлен пользователь: {user_id}")
             return True
         except Exception as e:
             self.session.rollback()
-            print(f"❌ Ошибка при добавлении пользователя {user_id}: {e}")
+            logger.error(f"Ошибка при добавлении пользователя {user_id}: {e}")
             return False
 
     def remove_user(self, user_id):
         """Удалить пользователя из белого списка"""
-        user = self.session.query(WhitelistUser).filter_by(user_id=user_id).first()
-        if user:
-            self.session.delete(user)
-            self.session.commit()
-            print(f"✅ Удален пользователь: {user_id}")
-            return True
-        print(f"❌ Пользователь {user_id} не найден")
-        return False
+        try:
+            user = self.session.query(WhitelistUser).filter_by(user_id=user_id).first()
+            if user:
+                self.session.delete(user)
+                self.session.commit()
+                logger.info(f"Удален пользователь: {user_id}")
+                return True
+            logger.error(f"Пользователь {user_id} не найден")
+            return False
+        except Exception as e:
+            self.session.rollback()
+            logger.error(f"Ошибка при удалении пользователя {user_id}: {e}")
+            return False
 
     def is_user_whitelisted(self, user_id):
         """Проверить, есть ли пользователь в белом списке"""

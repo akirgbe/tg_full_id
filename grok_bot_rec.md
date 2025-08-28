@@ -198,7 +198,7 @@ from app.services.notifications import notify_admins_on_startup
 async def on_startup():
     await notify_admins_on_startup(bot)
     start_scheduler()
-    print("Bot started")
+    logger.info("Bot started")
 
 
 async def main():
